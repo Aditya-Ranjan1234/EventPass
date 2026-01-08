@@ -1,0 +1,5 @@
+[
+  "backend/tests/test_screenshot.py::test_landing_page_screenshot[chromium]",
+  "backend/tests/test_workflow.py::test_face_verification_api",
+  "backend/tests/test_workflow.py::test_ui_full_flow[chromium]"
+]

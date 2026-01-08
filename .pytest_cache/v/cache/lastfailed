@@ -1,0 +1,3 @@
+{
+  "backend/tests/test_workflow.py::test_ui_full_flow[chromium]": true
+}
