@@ -1,5 +1,6 @@
 {
   "backend/tests/test_workflow.py::test_ui_full_flow[chromium]": true,
-  "backend/tests/test_comprehensive.py::test_05_ui_marketplace[chromium]": true,
-  "backend/tests/test_comprehensive.py::test_06_ui_ticket_purchase_flow[chromium]": true
+  "backend/tests/test_comprehensive.py::test_06_ui_ticket_purchase_flow[chromium]": true,
+  "backend/tests/test_comprehensive.py::test_07_ui_wallet_view[chromium]": true,
+  "backend/tests/test_comprehensive.py::test_08_ui_scanner_view[chromium]": true
 }
