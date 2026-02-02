@@ -11,6 +11,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [info, setInfo] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -41,6 +42,7 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setInfo(null);
 
     try {
       const supabase = createClient();
@@ -54,7 +56,12 @@ export default function LoginPage() {
         return;
       }
 
-      router.push("/");
+      setInfo(
+        "Account created. A verification email has been sent to " +
+          (email || "your email address") +
+          ". Please check your inbox and follow the instructions to verify your account."
+      );
+      setPassword("");
     } catch (err) {
       setError(String(err));
     } finally {
@@ -251,6 +258,12 @@ export default function LoginPage() {
                 {error && (
                   <div className="rounded-md border border-rose-400/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-200">
                     {error}
+                  </div>
+                )}
+
+                {info && (
+                  <div className="rounded-md border border-emerald-400/40 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-200">
+                    {info}
                   </div>
                 )}
 

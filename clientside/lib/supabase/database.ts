@@ -1,8 +1,5 @@
 import { createClient } from './clients';
 
-
-
-// --- REALTIME SUBSCRIPTIONS ---
 export const subscribeToUserProfile = (userId: string, callback: (data: Record<string, unknown>) => void) => {
   const supabase = createClient();
   const subscription = supabase
