@@ -125,7 +125,7 @@ export default function LoginPage() {
 <section className="flex flex-col justify-center gap-6">
   <div className="inline-flex w-fit items-center gap-3 rounded-xl bg-emerald-400/15 px-4 py-2 text-sm font-semibold text-emerald-200 ring-1 ring-emerald-400/40 backdrop-blur-sm">
     <span className="inline-block h-2 w-2 rounded-full bg-emerald-400" />
-    <span>SatyaTicketingg · On-chain & biometric bound
+    <span>SatyaTicketing · On-chain & biometric bound
 </span>
   </div>
 
