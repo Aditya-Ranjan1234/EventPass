@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Ticket, ShieldCheck, Lock, Activity, RefreshCcw } from 'lucide-react';
-import { subscribeToUserTickets } from '../../lib/supabase/database';
+import { Ticket, RefreshCcw, MapPin} from 'lucide-react';
+import { subscribeToUserTickets, getUserAvatarUrl, getUserProfile } from '../../lib/supabase/database';
 import { QRCodeCanvas } from "qrcode.react";
 
-export function MyTickets({ myTickets, resellTicket, setView, userId }) {
+
+export function MyTickets({ myTickets, resellTicket, setView, userId, userName, avatarUrl }) {
   useEffect(() => {
     if (!userId) return;
 
@@ -20,6 +21,9 @@ export function MyTickets({ myTickets, resellTicket, setView, userId }) {
   }, [userId]);
 
   const [qrSize, setQrSize] = useState(220);
+  const [username, setUsername] = useState(userName || null); // Initialize from prop
+
+  
 
   useEffect(() => {
     const updateSize = () => {
@@ -30,6 +34,46 @@ export function MyTickets({ myTickets, resellTicket, setView, userId }) {
     window.addEventListener('resize', updateSize);
     return () => window.removeEventListener('resize', updateSize);
   }, []);
+
+  // Map of owner_id -> avatar url (tries to retrieve from storage)
+  const [avatarMap, setAvatarMap] = useState({});
+
+  useEffect(() => {
+    if (!myTickets || !myTickets.length) return;
+    const owners = Array.from(new Set(myTickets.map(t => t.owner_id).filter(Boolean)));
+    const toFetch = owners.filter(id => !avatarMap[id]);
+    if (!toFetch.length) return;
+
+    const next = {};
+    toFetch.forEach(id => {
+      try {
+        const url = getUserAvatarUrl(id);
+        next[id] = url || null;
+      } catch (err) {
+        next[id] = null;
+      }
+    });
+    setAvatarMap(prev => ({ ...prev, ...next }));
+  }, [myTickets]);
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (!userId) {
+        setUsername(null);
+        return;
+      }
+      try {
+        const profile = await getUserProfile(userId); // Same function from VenueScanner
+        setUsername(profile?.full_name || userName || null);
+      } catch (err) {
+        console.error("Failed to fetch user profile:", err);
+        setUsername(userName || null);
+      }
+    };
+
+    fetchUserProfile();
+  }, [userId, userName]); // Dependencies: re-fetch if userId or prop changes
+
 
   return (
     <div className="px-4 py-6 sm:px-6 max-w-4xl mx-auto w-full">
@@ -42,52 +86,63 @@ export function MyTickets({ myTickets, resellTicket, setView, userId }) {
         </div>
       ) : (
         <div className="space-y-6">
-          {myTickets.map(ticket => (
-            <div key={ticket.ticket_id} className="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden flex flex-col md:flex-row">
-              <div className="md:w-1/3 bg-slate-900 p-6 text-white relative overflow-hidden w-full">
-                <div className="absolute -right-4 -top-4 w-24 h-24 bg-emerald-500/20 rounded-full blur-xl"></div>
-                <div className="relative z-10">
-                  <h3 className="font-bold text-xl mb-1">{ticket.events?.title || 'Event'}</h3>
-                  <p className="text-slate-400 text-sm mb-4">{ticket.events?.date || 'Date TBA'}</p>
-                  <div className="mt-8 border-t border-slate-700 pt-4">
-                    <div className="text-xs text-slate-500 uppercase tracking-wider mb-1">Ticket ID</div>
-                    <div className="font-medium flex items-center gap-2">{ticket.ticket_id} <ShieldCheck size={14} className="text-emerald-400" /></div>
+          {myTickets.map(ticket => {
+            const ownerAvatar = avatarMap[ticket.owner_id] || avatarUrl || `/avatars/${userId}.png`;
+            const holderName = ticket.holder_name || ticket.ticket_name || username || 'You';
+
+            const initials = (name) => {
+              if (!name) return 'U';
+              return name.split(' ').map(n => n[0]).slice(0,2).join('').toUpperCase();
+            };
+
+            return (
+              <div key={ticket.ticket_id} className="grid md:grid-cols-5 gap-0 overflow-hidden rounded-2xl shadow-lg border border-slate-100">
+                <div className="md:col-span-2 h-44 md:h-auto bg-cover bg-center relative" style={{ backgroundImage: `url(${ticket.events?.image || '/placeholder-event.jpg'})` }}>
+                  <div className="absolute inset-0 bg-gradient-to-r from-slate-900/70 to-transparent flex items-end p-4">
+                    <div className="flex items-center gap-3">
+                      {ownerAvatar ? (
+                        <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white">
+                          <img src={ownerAvatar} alt="owner" className="w-full h-full object-cover" />
+                        </div>
+                      ) : (
+                        <div className="w-12 h-12 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center font-semibold border-2 border-white">{initials(holderName)}</div>
+                      )}
+
+                      <div className="text-white">
+                        <div className="font-semibold text-lg leading-tight">{holderName}</div>
+                        <div className="text-emerald-200 text-sm">{ticket.events?.title}</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="absolute top-3 right-3 bg-emerald-600 text-white text-xs px-3 py-1 rounded-full font-semibold">₹{ticket.events?.price || 'N/A'}</div>
+                </div>
+
+                <div className="md:col-span-3 bg-white p-4 md:p-6 flex items-center">
+                  <div className="flex items-center gap-4 w-full">
+                    <div className="flex-shrink-0">
+                      <div className="bg-white p-2 rounded-lg border border-slate-100 shadow-inner">
+                        <QRCodeCanvas value={JSON.stringify({ ticket_id: ticket.ticket_id, user_id: userId })} size={Math.min(qrSize, 160)} level="H" includeMargin={true} />
+                      </div>
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs text-slate-500">Ticket ID</div>
+                      <div className="font-mono text-sm break-all">{ticket.ticket_id}</div>
+                      <div className="text-xs text-slate-500 mt-2">{ticket.events?.date} • <span className="text-emerald-600 font-medium">{ticket.events?.category}</span></div>
+                      <div className="text-sm font-semibold text-slate-800 pt-1.5">{ticket.events.location}</div>
+                    </div>
+                                                
+
+
+                    <div className="flex flex-col items-end gap-2">
+                      <button onClick={() => resellTicket(ticket)} className="bg-red-50 hover:bg-red-100 text-red-600 border border-red-100 py-2 px-3 rounded-lg text-sm font-medium flex items-center gap-2"><RefreshCcw size={16} /> Resell</button>
+                    </div>
                   </div>
                 </div>
               </div>
-              <div className="md:w-2/3 p-6 flex flex-col md:flex-row items-center justify-between gap-6">
-                <div className="flex flex-col items-center w-full md:w-auto">
-                  <div className="bg-white p-1 rounded-lg border border-slate-200 shadow-inner w-fit">
-                    <QRCodeCanvas
-                      value={JSON.stringify({
-                        user_id: userId,
-                        event_id: ticket.event_id,
-                      })}
-                      size={qrSize}
-                      level="H"
-                      includeMargin={true}
-                    />
-                  </div>
-
-                  <div className="text-xs font-mono text-slate-400 mt-2 text-center break-all">
-                    {ticket.ticket_id}
-                  </div>
-                </div>
-
-                <div className="flex-1 space-y-3 w-full">
-                  <div className="bg-emerald-50 p-3 rounded-lg border border-emerald-100">
-                    <div className="flex items-center gap-2 text-emerald-800 font-medium text-sm mb-1"><Lock size={14} /> Anti-Scalp Lock Active</div>
-                    <p className="text-xs text-emerald-600">This ticket is bound to your biometric hash. Resale is only permitted at face value (₹{ticket.events?.price || 'N/A'}) through this platform.</p>
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <button className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-colors"><Activity size={16} /> View History</button>
-                    <button onClick={() => resellTicket(ticket)} className="flex-1 bg-red-50 hover:bg-red-100 text-red-600 border border-red-100 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-colors"><RefreshCcw size={16} /> Resell Ticket</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
