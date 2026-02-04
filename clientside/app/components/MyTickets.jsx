@@ -228,12 +228,11 @@ export function MyTickets({ myTickets, resellTicket, setView, userId, userName, 
                   <div className="flex flex-col sm:flex-row gap-4 items-center sm:items-start">
                     {/* QR */}
                       {QRCodeComponent ? (
-                        <div className="bg-white p-2 rounded-lg border-none shadow-inner">
+                        <div className="bg-white p-2 rounded-lg  shadow-inner">
                           <QRCodeComponent
                             value={JSON.stringify({ ticket_id: ticket.ticket_id, user_id: userId, event_id: ticket.event_id || ticket.events?.id })}
                             size={qrSize}
                             level="H"
-                            includeMargin
                           />
                           {/* debug: expose QR payload for quick inspection */}
                           <div className="sr-only" data-qr-value={JSON.stringify({ ticket_id: ticket.ticket_id, user_id: userId, event_id: ticket.event_id || ticket.events?.id })} />

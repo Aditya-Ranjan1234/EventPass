@@ -285,49 +285,7 @@ export default function LoginPage() {
                     {loading ? "Working..." : "Create account"}
                   </button>
                 </div>
-
-                <div className="relative pt-4">
-                  <div className="flex items-center justify-center">
-                    <span className="h-px w-full bg-white/10" />
-                    <span className="px-2 text-[10px] uppercase tracking-[0.2em] text-slate-300/80">
-                      Or continue with
-                    </span>
-                    <span className="h-px w-full bg-white/10" />
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={handleGoogleSignIn}
-                    disabled={loading}
-                    className="mt-3 flex w-full items-center justify-center gap-3 rounded-lg border border-white/20 bg-white/10 px-3 py-2.5 text-xs font-medium text-slate-50 shadow-md transition hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-slate-200/60 disabled:cursor-not-allowed disabled:opacity-70"
-                  >
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 48 48"
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="shrink-0"
-                    >
-                      <path
-                        fill="#EA4335"
-                        d="M24 12.5c3.4 0 6 1.5 7.8 2.7l5.7-5.7C34.9 6 29.8 4 24 4 14.8 4 7 9.9 3.7 17.9l6.6 5.1C11.9 18.3 17.4 12.5 24 12.5z"
-                      />
-                      <path
-                        fill="#34A853"
-                        d="M46.5 24c0-1.6-.1-2.8-.4-4H24v8.1h12.6c-.6 3.3-2.8 6.1-6 7.6l6.8 5.3C43.6 36.4 46.5 30.7 46.5 24z"
-                      />
-                      <path
-                        fill="#4A90E2"
-                        d="M10.3 29.7A14.7 14.7 0 0 1 9 24c0-1.6.3-3.1.9-4.5L3.3 14.5C1.2 18.7 0 22.9 0 24c0 3.4 1.2 6.6 3.3 10l7-4.3z"
-                      />
-                      <path
-                        fill="#FBBC05"
-                        d="M24 44c6.4 0 11.9-2.1 15.9-5.8l-7.6-6c-2 1.5-4.6 2.4-8.3 2.4-6.6 0-12.1-5.8-13.4-10.6L3.3 34.1C7 39.5 14.8 44 24 44z"
-                      />
-                    </svg>
-                    <span>Continue with Google</span>
-                  </button>
-                </div>
+                <div></div>
               </form>
             </div>
           </section>
